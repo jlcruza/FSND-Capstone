@@ -19,7 +19,10 @@
                     <a class="nav-link text-white" href="#">Cast</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#">Account</a>
+                    <a class="nav-link text-white"
+                        href="https://casting-agency-capstone.auth0.com/authorize?audience=executive&response_type=token&client_id=o8j0f3DEN9v3URxAXn1o65vJorxZNLJ1&redirect_uri=http://localhost:8080/login">
+                        Account
+                    </a>
                 </li>
             </ul>
 
@@ -30,8 +33,8 @@
         <div id="services">
 
             <!-- Actors Manager -->
-            <div class="container full-width">
-                <div class="row full-width">
+            <div class="container full-width padding-30 no-margin">
+                <div class="row full-width no-margin">
                     <div class="col-12 col-lg-8 order-1">
                         <p class="h1 text-white">Manage Actors</p>
                         <hr class="white-line">
@@ -46,12 +49,14 @@
             </div>
 
             <!-- Movie Manager -->
-            <div class="container full-width">
-                <div class="row full-width">
+            <div class="container full-width padding-30 no-margin">
+                <div class="row full-width no-margin">
                     <div class="col-12 col-lg-8 order-2">
                         <p class="h1 text-white">Manage Movies</p>
                         <hr class="white-line">
-                        <p class="lead text-white">Help the movie database grow and provide to the world an accurate collection of movie information.</p>
+                        <p class="lead text-white">Help the movie database grow
+                            and provide to the world an accurate collection of
+                            movie information.</p>
                     </div>
                     <div class="col-12 col-lg-4 order-1">
                         <img class="sample-img" src="./assets/sample-movie.jpg">
@@ -60,13 +65,15 @@
             </div>
 
             <!-- Cast Manager -->
-            <div class="container full-width">
-                <div class="row full-width">
+            <div class="container full-width padding-30no-margin">
+                <div class="row full-width no-margin">
                     <div class="col-12">
                         <p class="h1 text-white text-center">Control Casting</p>
                         <hr class="white-line">
                         <p class="lead text-white text-center">
-                            Everyone needs to know all about the actors behind their favorite movies and you can help them through this platform.
+                            Everyone needs to know all about the actors behind
+                            their favorite movies and you can help them through
+                            this platform.
                         </p>
                     </div>
                 </div>
@@ -76,6 +83,14 @@
     </body>
 </html>
 
+<!-- Bootstrap -->
 <script src="./js/jquery-3.5.0.min.js"></script>
 <script src="./js/popper.min.js"></script>
 <script src="./js/bootstrap.min.js"></script>
+
+<!-- Auth0 -->
+<script
+    src="https://cdn.auth0.com/js/auth0-spa-js/1.7/auth0-spa-js.production.js"></script>
+<!-- Local -->
+<script src="./js/auth.js"></script>
+<script src="./js/index.js"></script>

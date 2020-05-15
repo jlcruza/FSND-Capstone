@@ -44,13 +44,15 @@ class Movie(db.Model):
     title = Column(String, nullable=False)
     released = Column(DateTime, nullable=False)
     picture_link = Column(String)
+    synopsis = Column(String)
     cast = relationship("Cast", backref="movies",
                         cascade="all,delete,delete-orphan")
 
-    def __init__(self, title, released, picture_link):
+    def __init__(self, title, released, picture_link, synopsis):
         self.title = title
         self.released = released
         self.picture_link = picture_link
+        self.synopsis = synopsis
 
     def insert(self):
         db.session.add(self)
@@ -68,7 +70,8 @@ class Movie(db.Model):
             'id': self.id,
             'title': self.title,
             'released': self.released,
-            'picture_link': self.picture_link
+            'picture_link': self.picture_link,
+            'synopsis':self.synopsis
         }
 
 
@@ -86,14 +89,16 @@ class Actor(db.Model):
     age = Column(Integer, nullable=False)
     gender = Column(String, nullable=False)
     picture_link = Column(String)
+    bio = Column(String)
     cast = relationship("Cast", backref="actors",
                         cascade="all,delete,delete-orphan")
 
-    def __init__(self, name, age, gender, picture_link):
+    def __init__(self, name, age, gender, picture_link, bio):
         self.name = name
         self.age = age
         self.gender = gender
         self.picture_link = picture_link
+        self.bio = bio
 
     def insert(self):
         db.session.add(self)
@@ -112,7 +117,8 @@ class Actor(db.Model):
             'name': self.name,
             'age': self.age,
             'gender': self.gender,
-            'picture_link': self.picture_link
+            'picture_link': self.picture_link,
+            'bio':self.bio
         }
 
 

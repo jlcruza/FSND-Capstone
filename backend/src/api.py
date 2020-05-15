@@ -3,15 +3,15 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-from models import setup_db, Movie, Actor
-from .auth.auth import AuthError, requires_auth
+from database.models import setup_db, db_drop_and_create_all, Movie, Actor
+from auth.auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
 
-    db_drop_and_create_all()
+    # db_drop_and_create_all()
 
     @app.after_request
     def after_request(response):
@@ -36,14 +36,14 @@ def create_app(test_config=None):
                 data.append(actor.format())
 
             return jsonify({
-                'success':True,
-                'actors':data,
-                'total':len(data)
+                'success': True,
+                'actors': data,
+                'total': len(data)
             })
-        
-        except:
-            abort(422)
 
+        except Exception as e:
+            print(e)
+            abort(422)
 
     @app.route('/movies', methods=['GET'])
     @requires_auth('read:movies')
@@ -61,12 +61,13 @@ def create_app(test_config=None):
                 data.append(movie.format())
 
             return jsonify({
-                'success':True,
-                'actors':data,
-                'total':len(data)
+                'success': True,
+                'movies': data,
+                'total': len(data)
             })
-        
-        except:
+
+        except Exception as e:
+            print(e)
             abort(422)
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
@@ -82,14 +83,15 @@ def create_app(test_config=None):
 
             if actor is None:
                 abort(404)
-            
+
             actor.delete()
-            
+
             return jsonify({
-                'success':True,
-                'delete':id
+                'success': True,
+                'delete': id
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     @app.route('/movies/<int:id>', methods=['DELETE'])
@@ -105,14 +107,15 @@ def create_app(test_config=None):
 
             if movie is None:
                 abort(404)
-            
+
             movie.delete()
-            
+
             return jsonify({
-                'success':True,
-                'delete':id
+                'success': True,
+                'delete': id
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     @app.route('/actors', methods=['POST'])
@@ -127,6 +130,7 @@ def create_app(test_config=None):
         age = body.get('age', None)
         gender = body.get('gender', None)
         picture_link = body.get('picture_link', None)
+        bio = body.get('bio', None)
 
         if name is None:
             abort(400)
@@ -134,22 +138,26 @@ def create_app(test_config=None):
             abort(400)
         elif gender is None:
             abort(400)
+        elif bio is None:
+            abort(400)
 
         try:
             actor = Actor(
                 name=name,
                 age=age,
                 gender=gender,
-                picture_link=picture_link
-                )
+                picture_link=picture_link,
+                bio=bio
+            )
 
             actor.insert()
-            
+
             return jsonify({
-                'success':True,
-                'created':actor.id
+                'success': True,
+                'created': actor.id
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     @app.route('/movies', methods=['POST'])
@@ -163,26 +171,31 @@ def create_app(test_config=None):
         title = body.get('title', None)
         released = body.get('released', None)
         picture_link = body.get('picture_link', None)
+        synopsis = body.get('synopsis', None)
 
         if title is None:
             abort(400)
         elif released is None:
+            abort(400)
+        elif synopsis is None:
             abort(400)
 
         try:
             movie = Movie(
                 title=title,
                 released=released,
-                picture_link=picture_link
-                )
+                picture_link=picture_link,
+                synopsis=synopsis
+            )
 
             movie.insert()
-            
+
             return jsonify({
-                'success':True,
-                'created':movie.id
+                'success': True,
+                'created': movie.id
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
@@ -197,8 +210,9 @@ def create_app(test_config=None):
         age = body.get('age', None)
         gender = body.get('gender', None)
         picture_link = body.get('picture_link', None)
+        bio = body.get('bio', None)
 
-        if name is None and age is None and gender is None and picture_link is None:
+        if name is None and age is None and gender is None and picture_link is None and bio is None:
             abort(400)
 
         try:
@@ -206,7 +220,7 @@ def create_app(test_config=None):
 
             if actor is None:
                 abort(404)
-            
+
             if name is not None:
                 actor.name = name
             if age is not None:
@@ -215,14 +229,17 @@ def create_app(test_config=None):
                 actor.gender = gender
             if picture_link is not None:
                 actor.picture_link = picture_link
-            
+            if bio is not None:
+                actor.bio = bio
+
             actor.update()
-            
+
             return jsonify({
-                'success':True,
-                'actor':actor.format()
+                'success': True,
+                'actor': actor.format()
             })
-        except:
+        except Exception as e:
+            print(e)
             abort(422)
 
     @app.route('/movies/<int:id>', methods=['PATCH'])
@@ -236,29 +253,35 @@ def create_app(test_config=None):
         title = body.get('title', None)
         released = body.get('released', None)
         picture_link = body.get('picture_link', None)
+        synopsis = body.get('synopsis', None)
 
-        if title is None and released is None and picture_link is None:
+        if title is None and released is None and synopsis is None:
             abort(400)
 
         try:
-            movie = Movie.query.filter(Actor.id == id).one_or_none()
+            movie = Movie.query.filter(Movie.id == id).one_or_none()
 
             if movie is None:
                 abort(404)
-            
+
             if title is not None:
                 movie.title = title
             if released is not None:
                 movie.released = released
             if picture_link is not None:
-                movie.gender = picture_link
-            
+                movie.picture_link = picture_link
+            if synopsis is not None:
+                movie.synopsis = synopsis
+
             movie.update()
-            
+
             return jsonify({
-                'success':True,
-                'movie':movie.format()
+                'success': True,
+                'movie': movie.format()
             })
+        except Exception as e:
+            print(e)
+            abort(422)
 
     @app.errorhandler(400)
     def bad_request(error):
@@ -309,7 +332,8 @@ def create_app(test_config=None):
         }), e.status_code
     return app
 
+
 APP = create_app()
 
 if __name__ == '__main__':
-    APP.run(host='0.0.0.0', port=8080, debug=True)
+    APP.run(host='127.0.0.1', port=8080, debug=True)
