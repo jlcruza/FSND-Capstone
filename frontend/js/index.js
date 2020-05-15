@@ -1,8 +1,11 @@
 (function () {
 
-    await authenticaotr.configureClient();
+    const boot = async ()=>{
+        await authenticaotr.configureClient();
 
-    document.getElementById('btn-login')
-    .addEventListener('click', authenticaotr.login());
+        document.getElementById('btn-login')
+        .addEventListener('click', authenticaotr.login());
+    }
     
+    boot()
 })()
