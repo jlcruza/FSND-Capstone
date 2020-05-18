@@ -89,7 +89,7 @@ def create_app(test_config=None):
 
             return jsonify({
                 'success': True,
-                'delete': id
+                'deleted': id
             })
         except Exception as e:
             print(e)
@@ -113,7 +113,7 @@ def create_app(test_config=None):
 
             return jsonify({
                 'success': True,
-                'delete': id
+                'deleted': id
             })
         except Exception as e:
             print(e)
