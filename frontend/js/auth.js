@@ -2,7 +2,8 @@ const authenticaotr = (() => {
 
   // The Auth0 client, initialized in configureClient()
   let auth0 = null;
-  const targetUrl = "https://casting-agency-capstone.auth0.com/authorize?audience=executive&response_type=token&client_id=o8j0f3DEN9v3URxAXn1o65vJorxZNLJ1&redirect_uri=https://jlcruza.github.io/FSND-Capstone/frontend/"
+  // const targetUrl = "https://casting-agency-capstone.auth0.com/authorize?audience=executive&response_type=token&client_id=o8j0f3DEN9v3URxAXn1o65vJorxZNLJ1&redirect_uri=https://jlcruza.github.io/FSND-Capstone/frontend/"
+  const targetUrl = "https://casting-agency-capstone.auth0.com/authorize?audience=executive&response_type=token&client_id=o8j0f3DEN9v3URxAXn1o65vJorxZNLJ1&redirect_uri=http://localhost:8080/FSND-Capstone/frontend/"
 
   /**
 * Starts the authentication flow
@@ -15,11 +16,12 @@ const authenticaotr = (() => {
         redirect_uri: window.location.origin
       };
 
-      if (targetUrl) {
-        options.appState = { targetUrl };
-      }
+      // if (targetUrl) {
+      //   options.appState = { targetUrl };
+      // }
 
-      await auth0.loginWithRedirect(options);
+      console.log(targetUrl)
+      await auth0.loginWithRedirect(targetUrl);
     } catch (err) {
       console.log("Log in failed", err);
     }

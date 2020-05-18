@@ -127,3 +127,14 @@ class Cast(db.Model):
     id = Column(Integer, primary_key=True)
     actors_id = Column(Integer, ForeignKey('actors.id'), nullable=False)
     movies_id = Column(Integer, ForeignKey('movies.id'), nullable=False)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

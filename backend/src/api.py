@@ -3,19 +3,20 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-from database.models import setup_db, db_drop_and_create_all, Movie, Actor
+from database.models import setup_db, db_drop_and_create_all, Movie, Actor, Cast
 from auth.auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
-
+    CORS(app, resources={r"*": {"origins": "*"}})
     # db_drop_and_create_all()
 
     @app.after_request
     def after_request(response):
-        response.headers.add("Access-Control-Allow-Origin", "*")
+        # response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
         response.headers.add(
             'Access-Control-Allow-Methods', 'GET, POST, DELETE, PATCH')
         return response
@@ -278,6 +279,164 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'movie': movie.format()
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    @app.route('/cast', methods=['POST'])
+    @requires_auth('patch:movies')
+    def create_cast(jwt):
+        '''
+        Link an actor with a movie
+        Requieres [patch:movies] permission.
+        '''
+        body = request.get_json()
+        actors_id = body.get('actors_id', None)
+        movies_id = body.get('movies_id', None)
+
+        if actors_id is None:
+            abort(400)
+        elif movies_id is None:
+            abort(400)
+
+        try:
+            repeated = Cast.query.filter(Cast.actors_id == actors_id).filter(Cast.movies_id == movies_id).one_or_none()
+            
+            if repeated is not None:
+                abort(400)
+
+            cast = Cast(
+                actors_id=actors_id,
+                movies_id=movies_id
+            )
+
+            cast.insert()
+
+            return jsonify({
+                'success': True,
+                'created': cast.id
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    
+    @app.route('/cast/<int:movies_id>/<int:actors_id>', methods=['DELETE'])
+    @requires_auth('patch:movies')
+    def delete_casting(jwt, movies_id, actors_id):
+        '''
+        Deletes an Actor from a Movie cast.
+        Requieres [patch:movies] permission.
+        '''
+        try:
+            cast = Cast.query.filter(Cast.actors_id == actors_id).filter(Cast.movies_id == movies_id).one_or_none()
+            
+            if cast is None:
+                abort(400)
+
+            cast_id = cast.id
+            cast.delete()
+
+            return jsonify({
+                'success': True,
+                'deleted': cast_id
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+
+
+    @app.route('/actors/<int:id>/cast', methods=['GET'])
+    @requires_auth('read:movies')
+    def get_actor_cast(jwt, id):
+        '''
+        Retrieves movies done by the actor.
+        Requieres [read:movies] permission.
+        '''
+        try:
+            cast_query = Movie.query.join(Cast).filter(
+                Cast.actors_id == id).all()
+
+            data = []
+            for cast in cast_query:
+                data.append({
+                    'movies_id': cast.id,
+                    'title': cast.title,
+                    'released': cast.released,
+                    'picture_link': cast.picture_link
+                })
+
+            return jsonify({
+                'success': True,
+                'movies': data
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    @app.route('/movies/<int:id>/cast', methods=['GET'])
+    @requires_auth('read:actors')
+    def get_movie_cast(jwt, id):
+        '''
+        Retrieves actors of the movie.
+        Requieres [read:actors] permission.
+        '''
+        try:
+            cast_query = Actor.query.join(Cast).filter(
+                Cast.movies_id == id).all()
+
+            data = []
+            for cast in cast_query:
+                data.append({
+                    'id': cast.id,
+                    'name': cast.name,
+                    'age': cast.age,
+                    'gender': cast.gender,
+                    'picture_link': cast.picture_link,
+                    'bio': cast.bio,
+                })
+
+            return jsonify({
+                'success': True,
+                'actors': data
+            })
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    @app.route('/movies/<int:id>/nocast', methods=['GET'])
+    @requires_auth('read:actors')
+    def get_movie_nocast(jwt, id):
+        '''
+        Retrieves actors that are not in the movie.
+        Requieres [read:actors] permission.
+        '''
+        try:
+            id_query = Actor.query.join(Cast).filter(
+                Cast.movies_id == id).all()
+
+            ids = []
+            for actor in id_query:
+                ids.append(actor.id)
+
+            cast_query = Actor.query.filter(~Actor.id.in_(ids))
+
+            data = []
+            for cast in cast_query:
+                data.append({
+                    'id': cast.id,
+                    'name': cast.name,
+                    'age': cast.age,
+                    'gender': cast.gender,
+                    'picture_link': cast.picture_link,
+                    'bio': cast.bio,
+                })
+
+            return jsonify({
+                'success': True,
+                'actors': data
             })
         except Exception as e:
             print(e)
